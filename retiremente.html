@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Mission Control Clock</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --panel-bg: #0a0d14;
+            --card-bg: #111625;
+            --cyan-glow: #00f0ff;
+            --red-glow: #ff0055;
+            --green-glow: #00ff66;
+            --dim-text: #475569;
+        }
+
+        body {
+            background-color: var(--panel-bg);
+            color: #f8fafc;
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .mission-control {
+            background-color: var(--card-bg);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .title-block h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 2px;
+            color: var(--cyan-glow);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .status-tag {
+            background: #166534;
+            color: #4ade80;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            border: 1px solid #22c55e;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        }
+
+        .sys-time {
+            font-size: 13px;
+            color: var(--dim-text);
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .clock-section {
+            margin-bottom: 22px;
+            background: #07090e;
+            padding: 18px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        .section-label {
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .label-total { color: var(--cyan-glow); }
+        .label-nonworking { color: var(--red-glow); }
+        .label-working { color: var(--green-glow); }
+
+        .display-board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+
+        .digit-box {
+            background: #0d111a;
+            border: 1px solid #1e293b;
+            padding: 10px 4px;
+            border-radius: 6px;
+        }
+
+        .number {
+            font-size: 32px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .total-glow {
+            color: var(--cyan-glow);
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+        }
+
+        .nonworking-glow {
+            color: var(--red-glow);
+            text-shadow: 0 0 12px rgba(255, 0, 85, 0.6);
+        }
+
+        .working-glow {
+            color: var(--green-glow);
+            text-shadow: 0 0 12px rgba(0, 255, 102, 0.6);
+        }
+
+        .unit {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 6px;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 640px) {
+            .display-board {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            .number { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mission-control">
+        <div class="header">
+            <div class="title-block">
+                <h1>T-MINUS RETIREMENT CLOCK</h1>
+            </div>
+            <div class="status-tag">ACTIVE COUNTDOWN</div>
+        </div>
+
+        <div class="sys-time" id="system-time">SYSTEM CLOCK: SYNCHRONIZING...</div>
+
+        <!-- TOTAL CALENDAR TIME -->
+        <div class="clock-section">
+            <div class="section-label label-total">► TOTAL CALENDAR TIME REMAINING</div>
+            <div class="display-board">
+                <div class="digit-box"><div class="number total-glow" id="tot-y">00</div><div class="unit">YEARS</div></div>
+                <div class="digit-box"><div class="number total-glow" id="tot-m">00</div><div class="unit">MONTHS</div></div>
+                <div class="digit-box"><div class="number total-glow" id="tot-d">00</div><div class="unit">DAYS</div></div>
+                <div class="digit-box"><div class="number total-glow" id="tot-h">00</div><div class="unit">HOURS</div></div>
+                <div class="digit-box"><div class="number total-glow" id="tot-min">00</div><div class="unit">MINS</div></div>
+                <div class="digit-box"><div class="number total-glow" id="tot-s">00</div><div class="unit">SECS</div></div>
+            </div>
+        </div>
+
+        <!-- NON-WORKING TIME -->
+        <div class="clock-section">
+            <div class="section-label label-nonworking">► TOTAL NON-WORKING TIME (WEEKENDS &amp; HOLIDAYS)</div>
+            <div class="display-board">
+                <div class="digit-box"><div class="number nonworking-glow" id="off-y">00</div><div class="unit">YEARS</div></div>
+                <div class="digit-box"><div class="number nonworking-glow" id="off-m">00</div><div class="unit">MONTHS</div></div>
+                <div class="digit-box"><div class="number nonworking-glow" id="off-d">00</div><div class="unit">DAYS</div></div>
+                <div class="digit-box"><div class="number nonworking-glow" id="off-h">00</div><div class="unit">HOURS</div></div>
+                <div class="digit-box"><div class="number nonworking-glow" id="off-min">00</div><div class="unit">MINS</div></div>
+                <div class="digit-box"><div class="number nonworking-glow" id="off-s">00</div><div class="unit">SECS</div></div>
+            </div>
+        </div>
+
+        <!-- ACTUAL WORKING TIME -->
+        <div class="clock-section">
+            <div class="section-label label-working">► NET DUTY / WORKING TIME REMAINING</div>
+            <div class="display-board">
+                <div class="digit-box"><div class="number working-glow" id="work-y">00</div><div class="unit">YEARS</div></div>
+                <div class="digit-box"><div class="number working-glow" id="work-m">00</div><div class="unit">MONTHS</div></div>
+                <div class="digit-box"><div class="number working-glow" id="work-d">00</div><div class="unit">DAYS</div></div>
+                <div class="digit-box"><div class="number working-glow" id="work-h">00</div><div class="unit">HOURS</div></div>
+                <div class="digit-box"><div class="number working-glow" id="work-min">00</div><div class="unit">MINS</div></div>
+                <div class="digit-box"><div class="number working-glow" id="work-s">00</div><div class="unit">SECS</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function pad(num) {
+            return String(num).padStart(2, '0');
+        }
+
+        function getObservedFederalHolidays(year) {
+            const holidays = [];
+            const fixedHolidays = [[0, 1], [5, 19], [6, 4], [10, 11], [11, 25]];
+
+            fixedHolidays.forEach(([month, day]) => {
+                let date = new Date(year, month, day);
+                let dayOfWeek = date.getDay();
+                if (dayOfWeek === 6) holidays.push(new Date(year, month, day - 1).toDateString());
+                else if (dayOfWeek === 0) holidays.push(new Date(year, month, day + 1).toDateString());
+                else holidays.push(date.toDateString());
+            });
+
+            function getNthWeekday(year, month, dayOfWeek, n) {
+                let date = new Date(year, month, 1);
+                let addDays = (dayOfWeek - date.getDay() + 7) % 7 + (n - 1) * 7;
+                date.setDate(1 + addDays);
+                return date;
+            }
+
+            function getLastWeekday(year, month, dayOfWeek) {
+                let date = new Date(year, month + 1, 0);
+                let subtractDays = (date.getDay() - dayOfWeek + 7) % 7;
+                date.setDate(date.getDate() - subtractDays);
+                return date;
+            }
+
+            holidays.push(getNthWeekday(year, 0, 1, 3).toDateString());
+            holidays.push(getNthWeekday(year, 1, 1, 3).toDateString());
+            holidays.push(getLastWeekday(year, 4, 1).toDateString());
+            holidays.push(getNthWeekday(year, 8, 1, 1).toDateString());
+            holidays.push(getNthWeekday(year, 9, 1, 2).toDateString());
+            holidays.push(getNthWeekday(year, 10, 4, 4).toDateString());
+
+            return holidays;
+        }
+
+        function formatHMS(totalSeconds) {
+            let y = Math.floor(totalSeconds / 31536000);
+            let remY = totalSeconds % 31536000;
+            let m = Math.floor(remY / 2592000);
+            let remM = remY % 2592000;
+            let d = Math.floor(remM / 86400);
+            let remD = remM % 86400;
+            let h = Math.floor(remD / 3600);
+            let remH = remD % 3600;
+            let min = Math.floor(remH / 60);
+            let s = Math.floor(remH % 60);
+
+            return { years: y, months: m, days: d, hours: h, minutes: min, seconds: s };
+        }
+
+        function updateMissionClock() {
+            const now = new Date();
+            const targetDate = new Date(2032, 11, 31, 23, 59, 59);
+
+            document.getElementById('system-time').innerText = `CURRENT SYSTEM TIME: ${now.toLocaleString().toUpperCase()}`;
+
+            if (now >= targetDate) return;
+
+            // 1. Total Calendar Seconds
+            let totalCalSec = Math.floor((targetDate.getTime() - now.getTime()) / 1000);
+            const tot = formatHMS(totalCalSec);
+
+            document.getElementById('tot-y').innerText = pad(tot.years);
+            document.getElementById('tot-m').innerText = pad(tot.months);
+            document.getElementById('tot-d').innerText = pad(tot.days);
+            document.getElementById('tot-h').innerText = pad(tot.hours);
+            document.getElementById('tot-min').innerText = pad(tot.minutes);
+            document.getElementById('tot-s').innerText = pad(tot.seconds);
+
+            // 2. Calculate distribution ratio of working vs non-working days
+            let holidaySet = new Set();
+            for (let yr = now.getFullYear(); yr <= 2032; yr++) {
+                getObservedFederalHolidays(yr).forEach(h => holidaySet.add(h));
+            }
+
+            let todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            let targetMidnight = new Date(2032, 11, 31);
+            let cur = new Date(todayMidnight);
+
+            let nonWorkDays = 0;
+            let workDays = 0;
+
+            while (cur <= targetMidnight) {
+                let dayOfWeek = cur.getDay();
+                let dateString = cur.toDateString();
+
+                if (dayOfWeek === 0 || dayOfWeek === 6 || holidaySet.has(dateString)) {
+                    nonWorkDays++;
+                } else {
+                    workDays++;
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+
+            let workRatio = workDays / (workDays + nonWorkDays);
+
+            // Compute active continuously ticking working & non-working seconds
+            let currentWorkSec = Math.floor(totalCalSec * workRatio);
+            let currentNonWorkSec = totalCalSec - currentWorkSec;
+
+            // Render Non-Working Counter
+            const off = formatHMS(currentNonWorkSec);
+            document.getElementById('off-y').innerText = pad(off.years);
+            document.getElementById('off-m').innerText = pad(off.months);
+            document.getElementById('off-d').innerText = pad(off.days);
+            document.getElementById('off-h').innerText = pad(off.hours);
+            document.getElementById('off-min').innerText = pad(off.minutes);
+            document.getElementById('off-s').innerText = pad(off.seconds);
+
+            // Render Net Duty / Working Counter
+            const work = formatHMS(currentWorkSec);
+            document.getElementById('work-y').innerText = pad(work.years);
+            document.getElementById('work-m').innerText = pad(work.months);
+            document.getElementById('work-d').innerText = pad(work.days);
+            document.getElementById('work-h').innerText = pad(work.hours);
+            document.getElementById('work-min').innerText = pad(work.minutes);
+            document.getElementById('work-s').innerText = pad(work.seconds);
+        }
+
+        updateMissionClock();
+        setInterval(updateMissionClock, 1000);
+    </script>
+</body>
+</html>
